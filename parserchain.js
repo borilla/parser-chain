@@ -7,31 +7,31 @@ var ParserChain = (function() {
 	var ParserChainPrototype = ParserChain.prototype;
 
 	ParserChainPrototype.reset = function() {
-		this.events = [];
 		this.parsers = [];
+		this.callbacks = [];
+		return this;
 	}
 
-	ParserChainPrototype.add = function(event, parser) {
-		this.events.push(event);
+	ParserChainPrototype.add = function(parser, callback) {
 		this.parsers.push(parser);
+		this.callbacks.push(callback);
+		return this;
 	}
 
 	ParserChainPrototype.parse = function(msg) {
-		var events = this.events;
 		var parsers = this.parsers;
 		for (var i = 0, l = parsers.length; i < l; ++i) {
 			var parser = parsers[i];
 			var parsed = parser.parse(msg);
 			if (parsed) {
-				return {
-					event: events[i],
-					index: i,
-					parsed: parsed,
-					parser: parser
-				};
+				var callback = this.callbacks[i];
+				if (callback) {
+					callback(parsed, i, this);
+				}
+				return parsed;
 			}
 		}
-		return false;
+		return undefined;
 	}
 
 	return ParserChain;

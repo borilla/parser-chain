@@ -1,68 +1,77 @@
+var parser0 = { parse: function(msg) { return undefined; } };
+var parser1 = { parse: function(msg) { return msg + ' parsed by parser1'; } };
+var parser2 = { parse: function(msg) { return msg + ' parsed by parser2'; } };
+var noop = function() {};
+var chain;
+
 module('ParserChain');
 
 test('constructor', function() {
 	equal(typeof ParserChain, 'function', 'constructor function exists');
-	var chain = new ParserChain();
+	chain = new ParserChain();
 	ok(chain instanceof ParserChain, 'can construct a parser-chain object');
-	strictEqual(chain.events.length, 0, 'starts off with empty array of events');
 	strictEqual(chain.parsers.length, 0, 'starts off with empty array of parsers');
+	strictEqual(chain.callbacks.length, 0, 'starts off with empty array of callbacks');
+});
+
+module('ParserChain instance', {
+	setup: function() {
+		chain = new ParserChain();
+	}
 });
 
 test('add', function() {
-	var chain = new ParserChain();
-	var event = 'event';
-	var parser = {};
-	chain.add(event, parser);
-	strictEqual(chain.events[0], event, 'adds event to array of events');
-	strictEqual(chain.parsers[0], parser, 'adds parser to array of parsers');
+	var callback = function() {};
+	chain.add(parser0, callback);
+	strictEqual(chain.parsers[0], parser0, 'adds parser to array of parsers');
+	strictEqual(chain.callbacks[0], callback, 'adds callback to array of callbacks');
+});
+
+test('add, without callback', function() {
+	chain.add(parser0);
+	strictEqual(chain.parsers[0], parser0, 'adds parser to array of parsers');
+	strictEqual(chain.callbacks.length, 1, 'adds empty callback to array of callbacks');
 });
 
 test('parse with no parsers added', function() {
-	var chain = new ParserChain();
-	var msg = 'messgae';
-	strictEqual(chain.parse(msg), false, 'returns false when fails to parse message');
+	var msg = 'message';
+	strictEqual(chain.parse(msg), undefined, 'returns undefined when fails to parse message');
 });
 
-test('parse with one parser, which successfully parses message', function() {
-	var chain = new ParserChain();
-	var msg = 'message';
-	var event1 = 'parser1';
-	var parser1 = { parse: function(msg) { return msg + ' parsed by parser1'; } };
-	chain.add(event1, parser1);
+test('parse with one parser, which successfully parses message, without callback', function() {
+	chain.add(parser1);
+	var result = chain.parse('message');
+	notEqual(result, undefined, 'returns value other than undefined');
+	strictEqual(result, 'message parsed by parser1', 'returns parsed message');
+});
 
-	var result = chain.parse(msg);
-	notEqual(result, false, 'parse-chain returns non-false result');
-	equal(result.event, 'parser1', 'expect event corresponding to first parser');
-	equal(result.parsed, 'message parsed by parser1', 'expect correctly parsed message');
+test('parse with one parser, which successfully parses message, with callback', function() {
+	expect(5);
+	var expectedResult = 'message parsed by parser1';
+	var callback1 = function(parsed, index, parserChain) {
+		ok(true, 'callback was called');
+		strictEqual(parsed, expectedResult, 'parsed result passed to callback');
+		strictEqual(index, 0, 'index of successful parser passed to callback');
+		strictEqual(parserChain, chain, 'parser-chain object passed to callback');
+	};
+	chain.add(parser1, callback1);
+	var result = chain.parse('message');
+	strictEqual(result, expectedResult, 'returns parsed result');
 });
 
 test('parse with one parser, which fails to parse message', function() {
-	var chain = new ParserChain();
-	var msg = 'message';
-	var event1 = 'parser1';
-	var parser1 = { parse: function(msg) { return false; } };
-	chain.add(event1, parser1);
-
-	var result = chain.parse(msg);
-	strictEqual(result, false, 'expect parse-chain to return false')
+	chain.add(parser0);
+	var result = chain.parse('message');
+	strictEqual(result, undefined, 'expect parse-chain to return undefined')
 });
 
 test('parse with three parsers', function() {
-	var chain = new ParserChain();
-	var msg = 'message';
-	var event1 = 'parser1';
-	var parser1 = { parse: function(msg) { return false; } };
-	var event2 = 'parser2';
-	var parser2 = { parse: function(msg) { return msg + ' parsed by parser2'; } };
-	var event3 = 'parser3';
-	var parser3 = { parse: function(msg) { return msg + ' parsed by parser3'; } };
-	chain.add(event1, parser1);
-	chain.add(event2, parser2);
-	chain.add(event3, parser3);
-
-	// expect parser2 to parse message
-	var result = chain.parse(msg);
-	notEqual(result, false, 'parse-chain returns non-false result');
-	equal(result.event, 'parser2', 'expect parser2 to be successful');
-	equal(result.parsed, 'message parsed by parser2', 'expect correctly parsed message');
+	expect(2);
+	chain.add(parser0);
+	chain.add(parser1, function() {
+		ok(true, 'callback for parser1 called');
+	});
+	chain.add(parser2);
+	var result = chain.parse('message');
+	equal(result, 'message parsed by parser1', 'expect parser1 to be successful');
 });
