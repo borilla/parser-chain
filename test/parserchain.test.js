@@ -1,7 +1,6 @@
 var parser0 = { parse: function(msg) { return undefined; } };
 var parser1 = { parse: function(msg) { return msg + ' parsed by parser1'; } };
 var parser2 = { parse: function(msg) { return msg + ' parsed by parser2'; } };
-var noop = function() {};
 var chain;
 
 module('ParserChain');
@@ -46,13 +45,10 @@ test('parse with one parser, which successfully parses message, without callback
 });
 
 test('parse with one parser, which successfully parses message, with callback', function() {
-	expect(5);
+	expect(2);
 	var expectedResult = 'message parsed by parser1';
 	var callback1 = function(parsed, index, parserChain) {
 		ok(true, 'callback was called');
-		strictEqual(parsed, expectedResult, 'parsed result passed to callback');
-		strictEqual(index, 0, 'index of successful parser passed to callback');
-		strictEqual(parserChain, chain, 'parser-chain object passed to callback');
 	};
 	chain.add(parser1, callback1);
 	var result = chain.parse('message');
@@ -66,12 +62,16 @@ test('parse with one parser, which fails to parse message', function() {
 });
 
 test('parse with three parsers', function() {
-	expect(2);
+	expect(5);
 	chain.add(parser0);
-	chain.add(parser1, function() {
+	var expectedResult = 'message parsed by parser1';
+	chain.add(parser1, function(parsed, index, parserChain) {
 		ok(true, 'callback for parser1 called');
+		strictEqual(parsed, expectedResult, 'parsed result passed to callback');
+		strictEqual(index, 1, 'index of successful parser passed to callback');
+		strictEqual(parserChain, chain, 'parser-chain object passed to callback');
 	});
 	chain.add(parser2);
 	var result = chain.parse('message');
-	equal(result, 'message parsed by parser1', 'expect parser1 to be successful');
+	equal(result, expectedResult, 'expect parser1 to be successful');
 });
