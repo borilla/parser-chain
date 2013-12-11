@@ -7,7 +7,7 @@ ContainsParser.prototype.parse = function(msg) {
 	if (msg && msg.indexOf(char) != -1)
 		return msg + ' contains ' + char;
 	// else
-	return false;
+	return undefined;
 }
 
 function BeginsWithParser(char) {
@@ -19,7 +19,7 @@ BeginsWithParser.prototype.parse = function(msg) {
 	if (msg && msg[0] === char)
 		return msg + ' begins with ' + char;
 	// else
-	return false;
+	return undefined;
 }
 
 function EndsWithParser(char) {
@@ -31,5 +31,5 @@ EndsWithParser.prototype.parse = function(msg) {
 	if (msg && msg[msg.length - 1] === char)
 		return msg + ' ends with ' + char;
 	// else
-	return false;
+	return undefined;
 }

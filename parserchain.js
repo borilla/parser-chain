@@ -1,38 +1,38 @@
-var ParserChain = (function() {
+var ProcessorChain = (function() {
 
-	var ParserChain = function() {
+	var ProcessorChain = function() {
 		this.reset();
 	}
 
-	var ParserChainPrototype = ParserChain.prototype;
+	var ProcessorChainPrototype = ProcessorChain.prototype;
 
-	ParserChainPrototype.reset = function() {
-		this.parsers = [];
+	ProcessorChainPrototype.reset = function() {
+		this.processors = [];
 		this.callbacks = [];
 		return this;
 	}
 
-	ParserChainPrototype.add = function(parser, callback) {
-		this.parsers.push(parser);
+	ProcessorChainPrototype.add = function(processor, callback) {
+		this.processors.push(processor);
 		this.callbacks.push(callback);
 		return this;
 	}
 
-	ParserChainPrototype.parse = function(msg) {
-		var parsers = this.parsers;
-		for (var i = 0, l = parsers.length; i < l; ++i) {
-			var parser = parsers[i];
-			var parsed = parser.parse(msg);
-			if (parsed) {
+	ProcessorChainPrototype.process = function(msg) {
+		var processors = this.processors;
+		for (var i = 0, l = processors.length; i < l; ++i) {
+			var processor = processors[i];
+			var processed = processor.process(msg);
+			if (processed !== undefined) {
 				var callback = this.callbacks[i];
 				if (callback) {
-					callback(parsed, i, this);
+					callback(processed, i, this);
 				}
-				return parsed;
+				return processed;
 			}
 		}
 		return undefined;
 	}
 
-	return ParserChain;
+	return ProcessorChain;
 }());
