@@ -2,6 +2,7 @@ var ProcessorChain = (function() {
 
 	var ProcessorChain = function() {
 		this.reset();
+		this.processMethod = 'process';
 	}
 
 	var ProcessorChainPrototype = ProcessorChain.prototype;
@@ -20,9 +21,10 @@ var ProcessorChain = (function() {
 
 	ProcessorChainPrototype.process = function(msg) {
 		var processors = this.processors;
+		var processMethod = this.processMethod;
 		for (var i = 0, l = processors.length; i < l; ++i) {
 			var processor = processors[i];
-			var processed = processor.process(msg);
+			var processed = processor[processMethod](msg);
 			if (processed !== undefined) {
 				var callback = this.callbacks[i];
 				if (callback) {
