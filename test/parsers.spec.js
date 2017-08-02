@@ -31,13 +31,13 @@ test('BeginsWithParser', function() {
 	var parser = new BeginsWithParser('m');
 	var msg = 'lorem ipsum';
 	var expected = undefined;
-	strictEqual(parser.parse(msg), expected, 'returns undefined is message does not begin with character');
+	strictEqual(parser.parse(msg), expected, 'returns undefined if message does not begin with character');
 });
 
 test('EndsWithParser', function() {
 	equal(typeof EndsWithParser, 'function', 'constructor function exists');
 	var parser = new EndsWithParser('x');
-	ok(parser instanceof EndsWithParser, 'can construct a ends-with-parser object');
+	ok(parser instanceof EndsWithParser, 'can construct an ends-with-parser object');
 	strictEqual(parser.char, 'x', 'stores provided character');
 
 	var parser = new EndsWithParser('m');
@@ -48,5 +48,5 @@ test('EndsWithParser', function() {
 	var parser = new EndsWithParser('o');
 	var msg = 'lorem ipsum';
 	var expected = undefined;
-	strictEqual(parser.parse(msg), expected, 'returns undefined is message does not end with character');
+	strictEqual(parser.parse(msg), expected, 'returns undefined if message does not end with character');
 });
